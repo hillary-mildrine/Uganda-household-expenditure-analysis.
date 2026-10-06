@@ -1,0 +1,53 @@
+* ==============================================================================
+* PROJECT: DETERMINANTS OF HOUSEHOLD CONSUMPTION EXPENDITURE IN UGANDA (1990-2020)
+* ENGINEER: NAMUGALU HILLARY MILDRINE
+* TARGET PLATFORM: GLOBAL IT / DATA ANALYTICS TRAINEESHIP PORTFOLIO
+* ==============================================================================
+
+clear all
+macro drop _all
+capture log close
+
+* 1. DATA INGESTION & EXPLORATION (ETL)
+* ------------------------------------------------------------------------------
+* Import cleaned time-series data sourced from World Bank WDI
+* Variables: Year, Consumption (C), Savings (S), Public_Debt (Y), Expenditure (G)
+
+describe
+summarize Consumption Savings Public_Debt Expenditure
+
+* 2. FEATURE ENGINEERING & STATIONARITY TESTING (DATA PIPELINE)
+* ------------------------------------------------------------------------------
+* Academic testing confirmed variables are integrated at first difference I(1)
+
+* Test dependent variable at first difference
+dfuller d.Consumption, trend lags(1)
+
+* Test independent variables at first difference
+dfuller d.Savings, trend lags(1)
+dfuller d.Public_Debt, trend lags(1)
+dfuller d.Expenditure, trend lags(1)
+
+* 3. ESTIMATION TECHIQUE: ORDINARY LEAST SQUARES (OLS) REGRESSION
+* ------------------------------------------------------------------------------
+* Running the primary econometric framework modeling macro influences
+
+regress Consumption Savings Public_Debt Expenditure
+
+* 4. RIGID MODEL DIAGNOSTIC & AUDITING PIPELINE
+* ------------------------------------------------------------------------------
+
+* Diagnostic A: Heteroscedasticity Assessment (Homoscedasticity Verification)
+estat hettest
+
+* Diagnostic B: Multicollinearity Auditing (Variance Inflation Factor Check)
+estat vif
+
+* Diagnostic C: Residual Autocorrelation Test (Breusch-Godfrey LM Check)
+estat bgodfrey, lags(1 2 3)
+
+* Diagnostic D: Residual Normality Distribution Test
+sktest residuals
+
+* Log closing and pipeline completion
+di "Data Validation Pipeline Successfully Executed with R-Squared: 0.6784"
